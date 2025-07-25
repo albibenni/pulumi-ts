@@ -28,14 +28,23 @@ export class MyBucketFirstExample extends pulumi.ComponentResource {
           Environment: stack,
         },
       },
+      {
+        parent: this,
+      },
     );
 
-    new aws.s3.BucketPublicAccessBlock(args.bucketName, {
-      bucket: bucketExample.id,
-      blockPublicAcls: true,
-      blockPublicPolicy: true,
-      ignorePublicAcls: true,
-      restrictPublicBuckets: true,
-    });
+    new aws.s3.BucketPublicAccessBlock(
+      args.bucketName,
+      {
+        bucket: bucketExample.id,
+        blockPublicAcls: true,
+        blockPublicPolicy: true,
+        ignorePublicAcls: true,
+        restrictPublicBuckets: true,
+      },
+      {
+        parent: this,
+      },
+    );
   }
 }
