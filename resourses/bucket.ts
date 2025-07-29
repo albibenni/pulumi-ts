@@ -4,6 +4,7 @@ import * as aws from "@pulumi/aws";
 type MyBucketFirstExampleArgs = {
   bucketName: string;
   product: string;
+  public?: boolean;
 };
 
 export class MyBucketFirstExample extends pulumi.ComponentResource {
@@ -19,32 +20,51 @@ export class MyBucketFirstExample extends pulumi.ComponentResource {
 
     const bucketName = `${resourceName}-${stack}`;
 
+    const bucketArgs: aws.s3.BucketArgs = {
+      acl: "private",
+      bucket: bucketName,
+      tags: {
+        Environment: stack,
+      },
+    };
+    if (args.public) {
+      bucketArgs.acl = "public-read";
+      bucketArgs.website = {
+        indexDocument: "index.html",
+        errorDocument: "error.html",
+        routingRules: `[{
+                    "Condition": {
+                    "KeyPrefixEquals": "docs/"
+                    },
+                    "Redirect": {
+                    "ReplaceKeyPrefixWith": "document/"
+                    }
+                }]`,
+      };
+    }
+
     const bucketExample = new aws.s3.Bucket(
       args.bucketName, // pulumi name
-      {
-        acl: "private",
-        bucket: bucketName, // amazon bucket name
-        tags: {
-          Environment: stack,
-        },
-      },
+      bucketArgs,
       {
         parent: this,
       },
     );
 
-    new aws.s3.BucketPublicAccessBlock(
-      args.bucketName,
-      {
-        bucket: bucketExample.id,
-        blockPublicAcls: true,
-        blockPublicPolicy: true,
-        ignorePublicAcls: true,
-        restrictPublicBuckets: true,
-      },
-      {
-        parent: this,
-      },
-    );
+    if (!args.public) {
+      new aws.s3.BucketPublicAccessBlock(
+        args.bucketName,
+        {
+          bucket: bucketExample.id,
+          blockPublicAcls: true,
+          blockPublicPolicy: true,
+          ignorePublicAcls: true,
+          restrictPublicBuckets: true,
+        },
+        {
+          parent: this,
+        },
+      );
+    }
   }
 }
