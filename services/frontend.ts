@@ -12,22 +12,19 @@ export class MyBucketFirstExampleFE extends ComponentResource {
     const resourceName = `${args.product}-${args.bucketName}`;
     super("my:bucket:MyBucketFirstExampleFE", resourceName, {}, opts);
 
-    const source = new MyBucketFirstExample(
+    new MyBucketFirstExample(
       {
         bucketName: args.bucketName,
         product: args.product,
       },
       { parent: this },
     );
-    const sourceReplica = new MyBucketFirstExample(
+    new MyBucketFirstExample(
       {
         bucketName: `${args.bucketName}-replica`,
         product: args.product,
       },
       { parent: this },
     );
-
-    console.log(source);
-    console.log(sourceReplica);
   }
 }
